@@ -1,0 +1,23 @@
+node_modules
+dist
+.DS_Store
+*.log
+
+# Ambiente: nunca versionar
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Firebase CLI
+.firebase
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Netlify CLI
+.netlify
+
+# Configuração local do Claude Code
+.claude
