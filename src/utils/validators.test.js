@@ -7,7 +7,7 @@ describe('e-mail', () => {
     expect(isValidEmail('ana.souza+tag@empresa.com.br')).toBe(true);
   });
 
-  it.each(['sem-arroba', 'a@b', 'a b@c.com', 'a@b.c', 'a/b@c.com'])('rejeita %s', (email) => {
+  it.each(['sem-arroba', 'a@b', 'a b@c.com', 'a@b.c', 'a/b@c.com', 'nome,sobrenome@gmail.com'])('rejeita %s', (email) => {
     expect(isValidEmail(email)).toBe(false);
   });
 

@@ -25,7 +25,11 @@ const AUTH_ERRORS = {
 };
 
 function toAuthError(error) {
-  return new Error(AUTH_ERRORS[error?.code] ?? 'Não foi possível concluir. Tente novamente.');
+  const message = AUTH_ERRORS[error?.code];
+  if (message) return new Error(message);
+  // Só o código vai para o console: a tela mostra uma mensagem genérica, e sem isso a causa se perde.
+  console.error('Falha de autenticação:', error?.code);
+  return new Error('Não foi possível concluir. Tente novamente.');
 }
 
 export async function signIn({ email, password }) {

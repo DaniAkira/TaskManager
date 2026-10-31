@@ -11,12 +11,19 @@ const REQUIRED_ENV = [
   'VITE_FIREBASE_APP_ID',
 ];
 
+// Valores colados mascarados (com •) passariam no build e só quebrariam o login em produção.
+const VALID_ENV_VALUE = /^[\x21-\x7E]+$/;
+
 // Sem isso, a falta de uma variável só apareceria como tela em branco no site publicado.
 function assertBuildEnv(mode) {
   const env = loadEnv(mode, process.cwd(), 'VITE_FIREBASE_');
   const missing = REQUIRED_ENV.filter((key) => !env[key]);
   if (missing.length > 0) {
     throw new Error(`Variáveis de ambiente ausentes no build: ${missing.join(', ')}`);
+  }
+  const invalid = REQUIRED_ENV.filter((key) => !VALID_ENV_VALUE.test(env[key]));
+  if (invalid.length > 0) {
+    throw new Error(`Variáveis de ambiente com caracteres inválidos: ${invalid.join(', ')}`);
   }
 }
 
