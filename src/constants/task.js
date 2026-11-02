@@ -71,9 +71,10 @@ export const PRIORITY_OPTIONS = [
   {
     value: 3,
     label: 'Alta',
-    bar: 'bg-orange-600 dark:bg-orange-400',
-    tone: 'text-orange-900 dark:text-orange-300',
-    chip: 'bg-orange-600/18 dark:bg-orange-400/20',
+    // Sólida como a Urgente, mas em laranja vivo com texto escuro: não se confunde com a Média.
+    bar: 'bg-orange-950',
+    tone: 'text-orange-950',
+    chip: 'bg-orange-500 dark:bg-orange-400',
     pulse: '[--pulse:var(--color-orange-500)] [--pulse-speed:2.1s]',
   },
   {
