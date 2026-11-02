@@ -41,6 +41,7 @@ boards/{boardId}
 
 boards/{boardId}/groups/{groupId}
   name, color (#rrggbb)
+  layout?: { x, y, w, h }   posição na grade de 12 colunas (desktop)
   createdBy, createdAt, updatedAt
 
 boards/{boardId}/tasks/{taskId}
@@ -69,6 +70,7 @@ invites/{boardId}_{email}
 | `members` (mapa) e `memberIds` (lista) | O mapa serve às Rules e à UI; a lista permite `array-contains` para listar os painéis do usuário | Dois campos para manter iguais; as Rules exigem que concordem |
 | Tarefas em subcoleção do painel | Herdam o acesso do painel, e um board carrega só as próprias tarefas | Mover entre painéis exige copiar e excluir, feito em batch atômico |
 | Cor só no grupo | Mudar a cor grava um documento, não todas as tarefas | O card precisa do grupo para renderizar, e o board já tem os grupos |
+| Layout no próprio grupo, em unidades da grade | Mover um bloco grava só os grupos que mudaram, e o mesmo layout serve a qualquer largura de tela | O layout é compartilhado entre os membros; não há um arranjo pessoal por usuário |
 | Subtarefas embutidas | Abrir o card não gera leituras extras | Edições simultâneas no mesmo checklist: a última vence. Limite de 50 itens |
 | Board escuta só `completedAt == null` | Concluídas não custam leituras até a tela ser aberta | `status` e `completedAt` precisam concordar, e as Rules exigem isso |
 | `order` fracionário | Mover um card grava um documento | Reindexa a coluna nos raros casos em que a precisão acaba |
@@ -104,6 +106,7 @@ Decisões de segurança que valem nas Rules, não só na UI:
 - **Reverter uma concluída:** restaura o status que ela tinha antes de finalizar.
 - **Detalhe da tarefa:** título, descrição, observação, status e subtarefas são editáveis na hora. Prazo, prioridade, grupo e comportamento ao finalizar exigem o botão "Editar tarefa", que dá acesso a tudo.
 - **Excluir grupo:** remove também as tarefas dele, inclusive as concluídas.
+- **Grade de grupos:** a partir de 1024px, os grupos são blocos arrastáveis pelo cabeçalho e redimensionáveis pelas bordas (`react-grid-layout`). No celular, viram colunas com rolagem lateral. A v2.3.0 da biblioteca só redesenha o bloco ao trocar de célula; `GroupGrid` força o redesenho a cada movimento, sem recriar o conteúdo, para o arraste seguir o mouse.
 - **Mover para outro painel:** arrastar para a barra que aparece durante o drag, ou usar "Mover para…" no detalhe. Exige permissão de edição nos dois painéis. A tarefa recebe o usuário que moveu como `createdBy`, porque as Rules exigem isso na criação.
 
 ## Trade-offs do plano Spark

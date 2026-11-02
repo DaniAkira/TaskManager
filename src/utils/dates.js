@@ -22,10 +22,10 @@ export function daysUntil(isoDate, now = new Date()) {
 export function describeDueDate(isoDate, now = new Date()) {
   const days = daysUntil(isoDate, now);
   const date = shortDate.format(parseLocalDate(isoDate)).replace('.', '');
-  if (days < 0) return { label: `Atrasada · ${date}`, urgency: 'overdue' };
-  if (days === 0) return { label: 'Vence hoje', urgency: 'today' };
-  if (days === 1) return { label: 'Vence amanhã', urgency: 'soon' };
-  return { label: date, urgency: 'later' };
+  if (days < 0) return { label: `Atrasada · ${date}`, short: date, urgency: 'overdue' };
+  if (days === 0) return { label: 'Vence hoje', short: 'Hoje', urgency: 'today' };
+  if (days === 1) return { label: 'Vence amanhã', short: 'Amanhã', urgency: 'soon' };
+  return { label: date, short: date, urgency: 'later' };
 }
 
 export function formatFullDate(isoDate) {

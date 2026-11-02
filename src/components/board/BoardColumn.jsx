@@ -1,17 +1,22 @@
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { GripVertical, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Menu } from '@/components/ui/Menu';
 import { DROP_TYPE } from '@/hooks/useTaskDnd';
 import { cn } from '@/utils/cn';
 import { SortableTaskCard } from './TaskCard';
 
+/**
+ * Um grupo do board. Em `tile`, preenche o bloco da grade e o cabeçalho vira a alça
+ * de arraste; sem ele, é uma coluna de largura fixa para a rolagem lateral do celular.
+ */
 export function BoardColumn({
   group,
   taskIds,
   tasksById,
   canEdit,
+  tile = false,
   onOpenTask,
   onStatusChange,
   onAddTask,
@@ -27,9 +32,18 @@ export function BoardColumn({
   return (
     <section
       aria-label={`Grupo ${group.name}`}
-      className="flex max-h-full w-[84vw] max-w-80 shrink-0 snap-center flex-col rounded-xl bg-sunken/70 sm:w-76"
+      className={cn(
+        'flex flex-col rounded-xl bg-sunken/70',
+        tile ? 'h-full w-full' : 'max-h-full w-[17.5rem] shrink-0 snap-center',
+      )}
     >
-      <header className="flex items-center gap-2 px-3 pt-3 pb-2">
+      <header
+        className={cn(
+          'flex items-center gap-2 px-3 pt-3 pb-2',
+          tile && canEdit && 'group-drag-handle cursor-grab select-none active:cursor-grabbing',
+        )}
+      >
+        {tile && canEdit && <GripVertical aria-hidden className="-ml-1 size-4 shrink-0 text-ink-faint" />}
         <span aria-hidden style={{ backgroundColor: group.color }} className="size-3 shrink-0 rounded-[3px] shadow-note" />
         <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{group.name}</h2>
         <span className="text-xs font-semibold text-ink-faint tabular-nums">{taskIds.length}</span>
@@ -51,11 +65,12 @@ export function BoardColumn({
         )}
       </header>
 
-      <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+      <SortableContext items={taskIds} strategy={rectSortingStrategy}>
         <ul
           ref={setNodeRef}
           className={cn(
-            'flex min-h-24 flex-1 flex-col gap-2.5 overflow-y-auto rounded-b-xl px-2.5 pt-1 pb-3 transition-colors',
+            // Post-its de 200 a 240px; em grupos mais estreitos que isso, eles encolhem junto.
+            'grid min-h-24 flex-1 grid-cols-[repeat(auto-fill,minmax(min(12.5rem,100%),15rem))] content-start gap-2.5 overflow-y-auto rounded-b-xl px-2.5 pt-1 pb-3 transition-colors',
             isOver && 'bg-accent/8',
           )}
         >
@@ -70,7 +85,7 @@ export function BoardColumn({
             />
           ))}
           {taskIds.length === 0 && (
-            <li className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-ink-faint">
+            <li className="col-span-full flex items-center justify-center rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-ink-faint">
               {canEdit ? 'Crie uma tarefa ou arraste uma para cá.' : 'Sem tarefas neste grupo.'}
             </li>
           )}

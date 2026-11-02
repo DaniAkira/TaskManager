@@ -176,7 +176,7 @@ export function TaskFormModal({ boardId, groups, groupId, task, actions, onClose
                 selected={values.priority === option.value}
                 onSelect={() => set('priority')(option.value)}
               >
-                <PriorityBadge value={option.value} />
+                <PriorityBadge value={option.value} animated={false} />
               </ChoiceCard>
             ))}
           </div>

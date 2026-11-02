@@ -1,9 +1,9 @@
 import { useId, useRef } from 'react';
 import { cn } from '@/utils/cn';
+import { placePopover } from '@/utils/popover';
 
 const MENU_WIDTH = 216;
 const ITEM_HEIGHT = 40;
-const GAP = 6;
 
 /**
  * Menu de ações sobre a Popover API: fecha com Esc e clique fora, e por estar na
@@ -13,14 +13,11 @@ export function Menu({ trigger, label, items, heading, triggerClassName }) {
   const id = useId();
   const popoverRef = useRef(null);
 
-  const place = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const height = items.length * ITEM_HEIGHT + 16;
-    const fitsBelow = rect.bottom + GAP + height < window.innerHeight;
-    const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - 8));
-    popoverRef.current.style.left = `${left}px`;
-    popoverRef.current.style.top = `${fitsBelow ? rect.bottom + GAP : Math.max(8, rect.top - height - GAP)}px`;
-  };
+  const place = (event) =>
+    placePopover(popoverRef.current, event.currentTarget, {
+      width: MENU_WIDTH,
+      height: items.length * ITEM_HEIGHT + 16,
+    });
 
   const select = (item) => {
     popoverRef.current.hidePopover();

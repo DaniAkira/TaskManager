@@ -6,6 +6,7 @@ import { BoardColumn } from '@/components/board/BoardColumn';
 import { BoardDropDock } from '@/components/board/BoardDropDock';
 import { BoardHeader } from '@/components/board/BoardHeader';
 import { GroupFormModal } from '@/components/board/GroupFormModal';
+import { GroupGrid } from '@/components/board/GroupGrid';
 import { MoveTaskModal } from '@/components/board/MoveTaskModal';
 import { TaskCard } from '@/components/board/TaskCard';
 import { TaskDetailModal } from '@/components/board/TaskDetailModal';
@@ -17,13 +18,15 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { useActiveTasks, useGroups } from '@/hooks/useBoardData';
 import { useAuth, useConfirm, useToast, useWorkspace } from '@/hooks/useContexts';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { useTaskDnd } from '@/hooks/useTaskDnd';
-import { deleteGroup } from '@/services/groups';
+import { deleteGroup, updateGroupLayouts } from '@/services/groups';
 import { canEditBoard } from '@/utils/board';
 import { friendlyError } from '@/utils/errors';
 
 const TASK_PARAM = 'tarefa';
+const WIDE_QUERY = '(min-width: 1024px)';
 const DND_MEASURING = { droppable: { strategy: MeasuringStrategy.Always } };
 const NO_ITEMS = [];
 
@@ -63,6 +66,8 @@ function BoardView({ board }) {
   const [editingBoard, setEditingBoard] = useState(false);
 
   const canEdit = canEditBoard(board, user.uid);
+  // No celular a grade não compensa: arrastar blocos com o dedo briga com a rolagem.
+  const wide = useMediaQuery(WIDE_QUERY);
   const groupsById = useMemo(() => Object.fromEntries(groups.map((g) => [g.id, g])), [groups]);
   const tasksById = useMemo(() => Object.fromEntries(tasks.map((t) => [t.id, t])), [tasks]);
   const moveTargets = useMemo(
@@ -92,6 +97,25 @@ function BoardView({ board }) {
     });
     if (accepted) deleteGroup(board.id, group.id).catch((error) => toast.error(friendlyError(error)));
   };
+
+  const saveLayout = (changes) =>
+    updateGroupLayouts(board.id, changes).catch((error) => toast.error(friendlyError(error)));
+
+  const renderColumn = (group, tile) => (
+    <BoardColumn
+      key={group.id}
+      group={group}
+      tile={tile}
+      taskIds={columns[group.id] ?? NO_ITEMS}
+      tasksById={tasksById}
+      canEdit={canEdit}
+      onOpenTask={openTask}
+      onStatusChange={actions.changeStatus}
+      onAddTask={setTaskFormGroupId}
+      onEditGroup={(target) => setGroupForm({ group: target })}
+      onDeleteGroup={removeGroup}
+    />
+  );
 
   if (groupsState.error || tasksState.error) return <BoardUnavailable />;
   if (groupsState.loading || tasksState.loading) return <PageSpinner />;
@@ -124,22 +148,21 @@ function BoardView({ board }) {
         </EmptyState>
       ) : (
         <DndContext {...dndProps} measuring={DND_MEASURING}>
-          <div className="flex min-h-0 flex-1 snap-x snap-proximity items-start gap-3.5 overflow-x-auto px-4 pb-4 sm:px-6">
-            {groups.map((group) => (
-              <BoardColumn
-                key={group.id}
-                group={group}
-                taskIds={columns[group.id] ?? NO_ITEMS}
-                tasksById={tasksById}
+          {wide ? (
+            // Gutter estável: sem ele a barra de rolagem estreita a grade e os blocos pulam.
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 [scrollbar-gutter:stable] sm:px-6">
+              <GroupGrid
+                groups={groups}
                 canEdit={canEdit}
-                onOpenTask={openTask}
-                onStatusChange={actions.changeStatus}
-                onAddTask={setTaskFormGroupId}
-                onEditGroup={(target) => setGroupForm({ group: target })}
-                onDeleteGroup={removeGroup}
+                onLayoutCommit={saveLayout}
+                renderGroup={(group) => renderColumn(group, true)}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 snap-x snap-proximity items-start gap-3.5 overflow-x-auto px-4 pb-4 sm:px-6">
+              {groups.map((group) => renderColumn(group, false))}
+            </div>
+          )}
           {activeTask && <BoardDropDock boards={moveTargets} />}
           <DragOverlay dropAnimation={{ duration: 180, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
             {activeTask && (

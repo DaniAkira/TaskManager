@@ -8,8 +8,9 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore';
-import { deleteInBatches } from './batch';
+import { chunk, deleteInBatches } from './batch';
 import { db } from './firebase';
 import { byCreatedAt, mapDoc } from './mappers';
 
@@ -36,6 +37,17 @@ export function createGroup(boardId, uid, { name, color }) {
 
 export function updateGroup(boardId, groupId, { name, color }) {
   return updateDoc(groupRef(boardId, groupId), { name, color, updatedAt: serverTimestamp() });
+}
+
+/** Grava as posições na grade em um único batch: arrastar um bloco pode empurrar vários. */
+export async function updateGroupLayouts(boardId, changes) {
+  for (const part of chunk(changes)) {
+    const batch = writeBatch(db);
+    part.forEach(({ id, layout }) =>
+      batch.update(groupRef(boardId, id), { layout, updatedAt: serverTimestamp() }),
+    );
+    await batch.commit();
+  }
 }
 
 /** Remove o grupo e todas as tarefas dele, inclusive as já concluídas. */

@@ -69,11 +69,24 @@ service cloud.firestore {
         && data.updatedAt == request.time;
     }
 
+    // Posição do grupo na grade de 12 colunas (src/utils/groupLayout.js).
+    function validLayout(layout) {
+      return layout is map
+        && hasExactly(layout, ['x', 'y', 'w', 'h'])
+        && layout.x is int && layout.y is int && layout.w is int && layout.h is int
+        && layout.x >= 0 && layout.w >= 1 && layout.x + layout.w <= 12
+        && layout.y >= 0 && layout.y <= 10000
+        && layout.h >= 1 && layout.h <= 60;
+    }
+
+    // layout é opcional: grupos criados antes da grade não têm posição salva.
     function validGroup(data) {
-      return hasExactly(data, ['name', 'color', 'createdBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['name', 'color', 'layout', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasAll(['name', 'color', 'createdBy', 'createdAt', 'updatedAt'])
         && isText(data.name, 1, 60)
         && data.color is string
         && data.color.matches('^#[0-9a-fA-F]{6}$')
+        && (!('layout' in data) || validLayout(data.layout))
         && data.updatedAt == request.time;
     }
 
@@ -194,7 +207,7 @@ service cloud.firestore {
         allow update: if canEdit(boardId)
           && validGroup(request.resource.data)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name', 'color', 'updatedAt']);
+               .hasOnly(['name', 'color', 'layout', 'updatedAt']);
 
         allow delete: if canEdit(boardId);
       }

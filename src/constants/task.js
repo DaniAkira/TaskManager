@@ -14,30 +14,35 @@ export const STATUS_OPTIONS = [
     label: 'Não iniciada',
     icon: Circle,
     tone: 'text-ink-soft',
+    chip: 'bg-black/6 dark:bg-white/8',
   },
   {
     value: STATUS.IN_PROGRESS,
     label: 'Em andamento',
     icon: PlayCircle,
     tone: 'text-sky-800 dark:text-sky-300',
+    chip: 'bg-sky-600/12 dark:bg-sky-400/15',
   },
   {
     value: STATUS.PAUSED,
     label: 'Pausada',
     icon: PauseCircle,
     tone: 'text-amber-800 dark:text-amber-300',
+    chip: 'bg-amber-500/18 dark:bg-amber-400/15',
   },
   {
     value: STATUS.BLOCKED,
     label: 'Bloqueada',
     icon: Ban,
     tone: 'text-rose-800 dark:text-rose-300',
+    chip: 'bg-rose-600/12 dark:bg-rose-400/15',
   },
   {
     value: STATUS.DONE,
     label: 'Finalizada',
     icon: CheckCircle2,
     tone: 'text-emerald-800 dark:text-emerald-300',
+    chip: 'bg-emerald-600/12 dark:bg-emerald-400/15',
   },
 ];
 
@@ -53,6 +58,7 @@ export const PRIORITY_OPTIONS = [
     bar: 'bg-sky-600 dark:bg-sky-400',
     tone: 'text-sky-800 dark:text-sky-300',
     chip: 'bg-sky-600/12 dark:bg-sky-400/15',
+    pulse: '[--pulse:var(--color-sky-500)] [--pulse-speed:3.4s]',
   },
   {
     value: 2,
@@ -60,6 +66,7 @@ export const PRIORITY_OPTIONS = [
     bar: 'bg-amber-600 dark:bg-amber-400',
     tone: 'text-amber-900 dark:text-amber-300',
     chip: 'bg-amber-600/15 dark:bg-amber-400/15',
+    pulse: '[--pulse:var(--color-amber-500)] [--pulse-speed:2.8s]',
   },
   {
     value: 3,
@@ -67,6 +74,7 @@ export const PRIORITY_OPTIONS = [
     bar: 'bg-orange-600 dark:bg-orange-400',
     tone: 'text-orange-900 dark:text-orange-300',
     chip: 'bg-orange-600/18 dark:bg-orange-400/20',
+    pulse: '[--pulse:var(--color-orange-500)] [--pulse-speed:2.1s]',
   },
   {
     value: 4,
@@ -74,6 +82,7 @@ export const PRIORITY_OPTIONS = [
     bar: 'bg-white dark:bg-rose-950',
     tone: 'text-white dark:text-rose-950',
     chip: 'bg-rose-700 dark:bg-rose-400',
+    pulse: '[--pulse:var(--color-rose-500)] [--pulse-speed:1.4s]',
   },
 ];
 

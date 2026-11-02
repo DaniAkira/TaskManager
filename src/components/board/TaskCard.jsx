@@ -8,6 +8,11 @@ import { cn } from '@/utils/cn';
 import { DueBadge, PriorityBadge } from './TaskBadges';
 import { StatusSelect } from './StatusSelect';
 
+// Pegar a barra de rolagem da observação não pode iniciar o arraste do post-it.
+function keepScrollbarFromDragging(event) {
+  if (event.nativeEvent.offsetX >= event.currentTarget.clientWidth) event.stopPropagation();
+}
+
 export function TaskCard({ task, color, canEdit, onStatusChange, lifted = false }) {
   const doneSubtasks = task.subtasks.filter((subtask) => subtask.done).length;
 
@@ -16,34 +21,41 @@ export function TaskCard({ task, color, canEdit, onStatusChange, lifted = false 
       style={{ '--group': color, '--tilt': tiltFor(task.id) }}
       className={cn('note', lifted && 'note-lifted')}
     >
-      <article className="note-paper flex flex-col gap-2 p-3 pb-4">
-        <div className="flex items-center justify-between gap-2">
-          <PriorityBadge value={task.priority} />
-          <DueBadge date={task.dueDate} />
-        </div>
-        <h3 className="font-display text-[15px] leading-snug font-semibold wrap-anywhere">{task.title}</h3>
-        {task.note && (
-          <p className="line-clamp-3 text-[13px] leading-relaxed whitespace-pre-line text-ink-soft wrap-anywhere">
-            {task.note}
-          </p>
-        )}
-        <div className="mt-0.5 flex items-center gap-2 pr-3">
+      {/*
+        Formato baixo, de altura igual para todos e proporcional à tela: prioridade e status
+        dividem a primeira linha, o título fica em uma linha só e a observação rola no que sobra.
+      */}
+      <article className="note-paper @container flex h-[clamp(6.5rem,13vh,8rem)] flex-col gap-1.5 p-2.5 pb-3">
+        <div className="flex shrink-0 items-center justify-between gap-2">
+          <PriorityBadge compact value={task.priority} />
           <StatusSelect
+            compact
             value={task.status}
             disabled={!canEdit}
             onChange={(status) => onStatusChange(task, status)}
           />
-          <span className="flex-1" />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <h3 title={task.title} className="min-w-0 flex-1 truncate font-display text-[14px] leading-tight font-semibold">
+            {task.title}
+          </h3>
+          <DueBadge compact date={task.dueDate} />
           {task.onComplete === ON_COMPLETE.RESET && (
-            <Repeat aria-label="Tarefa recorrente" className="size-3.5 text-ink-soft" />
+            <Repeat aria-label="Tarefa recorrente" className="size-3.5 shrink-0 text-ink-soft" />
           )}
           {task.subtasks.length > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-ink-soft tabular-nums">
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-ink-soft tabular-nums">
               <ListChecks aria-hidden className="size-3.5" />
               {doneSubtasks}/{task.subtasks.length}
             </span>
           )}
         </div>
+        <p
+          onMouseDown={keepScrollbarFromDragging}
+          className="-mr-1.5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-3 text-[12.5px] leading-normal whitespace-pre-line text-ink-soft wrap-anywhere [scrollbar-width:thin]"
+        >
+          {task.note}
+        </p>
       </article>
     </div>
   );

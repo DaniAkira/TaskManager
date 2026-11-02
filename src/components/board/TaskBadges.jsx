@@ -1,5 +1,5 @@
 import { CalendarDays } from 'lucide-react';
-import { priorityOption } from '@/constants/task';
+import { priorityOption, statusOption } from '@/constants/task';
 import { cn } from '@/utils/cn';
 import { describeDueDate } from '@/utils/dates';
 
@@ -10,15 +10,20 @@ const DUE_TONES = {
   later: 'text-ink-soft',
 };
 
-/** Barras de sinal crescentes: lê-se o nível sem depender só da cor. */
-export function PriorityBadge({ value, className }) {
+/**
+ * Barras de sinal crescentes: lê-se o nível sem depender só da cor.
+ * O pulso acelera conforme a prioridade sobe; em listas de escolha ele fica desligado.
+ */
+export function PriorityBadge({ value, animated = true, compact = false, className }) {
   const option = priorityOption(value);
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center gap-1.5 rounded-full px-2 text-xs font-semibold',
+        'relative inline-flex shrink-0 items-center rounded-full font-semibold whitespace-nowrap',
+        compact ? 'h-5.5 gap-1 px-1.5 text-[11px]' : 'h-6 gap-1.5 px-2 text-xs',
         option.chip,
         option.tone,
+        animated && ['priority-pulse', option.pulse],
         className,
       )}
     >
@@ -31,18 +36,43 @@ export function PriorityBadge({ value, className }) {
           />
         ))}
       </span>
-      {option.label}
+      {/* Em post-its estreitos, só as barras: o nome fica para leitores de tela. */}
+      <span className={cn(compact && '@max-[13rem]:sr-only')}>{option.label}</span>
     </span>
   );
 }
 
-export function DueBadge({ date, className }) {
-  if (!date) return null;
-  const { label, urgency } = describeDueDate(date);
+/** Mesmo visual no card, no gatilho do status e em cada opção do menu de status. */
+export function StatusBadge({ value, className }) {
+  const option = statusOption(value);
+  const Icon = option.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1 text-xs', DUE_TONES[urgency], className)}>
+    <span
+      className={cn(
+        'inline-flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold whitespace-nowrap',
+        option.chip,
+        option.tone,
+        className,
+      )}
+    >
+      <Icon aria-hidden className="size-3.5 shrink-0" />
+      <span className="truncate">{option.label}</span>
+    </span>
+  );
+}
+
+/** `compact` troca a frase pela forma curta; a frase completa fica na dica e no leitor de tela. */
+export function DueBadge({ date, compact = false, className }) {
+  if (!date) return null;
+  const { label, short, urgency } = describeDueDate(date);
+  return (
+    <span
+      title={label}
+      aria-label={`Prazo: ${label}`}
+      className={cn('inline-flex shrink-0 items-center gap-1 text-xs whitespace-nowrap', DUE_TONES[urgency], className)}
+    >
       <CalendarDays aria-hidden className="size-3.5" />
-      {label}
+      {compact ? short : label}
     </span>
   );
 }
