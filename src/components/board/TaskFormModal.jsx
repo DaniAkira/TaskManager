@@ -117,12 +117,13 @@ export function TaskFormModal({ boardId, groups, groupId, task, actions, onClose
             <Input {...control} data-autofocus value={values.title} maxLength={LIMITS.taskTitle} onChange={fromEvent('title')} />
           )}
         </Field>
-        <Field label="Observação" hint="Aparece no post-it.">
+        {/* Na interface, "note" se chama Descrição (o texto do post-it) e "description", Observação. */}
+        <Field label="Descrição" hint="Aparece no post-it.">
           {(control) => (
             <Textarea {...control} rows={2} value={values.note} maxLength={LIMITS.taskNote} onChange={fromEvent('note')} />
           )}
         </Field>
-        <Field label="Descrição">
+        <Field label="Observação">
           {(control) => (
             <Textarea
               {...control}

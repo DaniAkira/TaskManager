@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { DueBadge, PriorityBadge } from './TaskBadges';
 import { StatusSelect } from './StatusSelect';
 
-// Pegar a barra de rolagem da observação não pode iniciar o arraste do post-it.
+// Pegar a barra de rolagem da descrição não pode iniciar o arraste do post-it.
 function keepScrollbarFromDragging(event) {
   if (event.nativeEvent.offsetX >= event.currentTarget.clientWidth) event.stopPropagation();
 }
@@ -23,7 +23,7 @@ export function TaskCard({ task, color, canEdit, onStatusChange, lifted = false 
     >
       {/*
         Formato baixo, de altura igual para todos e proporcional à tela: prioridade e status
-        dividem a primeira linha, o título fica em uma linha só e a observação rola no que sobra.
+        dividem a primeira linha, o título fica em uma linha só e a descrição rola no que sobra.
       */}
       <article className="note-paper @container flex h-[clamp(6.5rem,13vh,8rem)] flex-col gap-1.5 p-2.5 pb-3">
         <div className="flex shrink-0 items-center justify-between gap-2">

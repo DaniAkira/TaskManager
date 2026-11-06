@@ -106,12 +106,13 @@ export function TaskDetailModal({ task, group, groups, boardId, canEdit, actions
           </Setting>
         </dl>
 
-        <Section title="Observação">
+        {/* "note" aparece como Descrição (é o texto do post-it); "description", como Observação. */}
+        <Section title="Descrição">
           <EditableText
             multiline
-            label="Observação"
+            label="Descrição"
             value={task.note}
-            placeholder={canEdit ? 'Adicione uma observação' : 'Sem observação'}
+            placeholder={canEdit ? 'Adicione uma descrição' : 'Sem descrição'}
             readOnly={!canEdit}
             maxLength={LIMITS.taskNote}
             onSave={save('note')}
@@ -119,12 +120,12 @@ export function TaskDetailModal({ task, group, groups, boardId, canEdit, actions
           />
         </Section>
 
-        <Section title="Descrição">
+        <Section title="Observação">
           <EditableText
             multiline
-            label="Descrição"
+            label="Observação"
             value={task.description}
-            placeholder={canEdit ? 'Adicione uma descrição' : 'Sem descrição'}
+            placeholder={canEdit ? 'Adicione uma observação' : 'Sem observação'}
             readOnly={!canEdit}
             maxLength={LIMITS.taskDescription}
             onSave={save('description')}
