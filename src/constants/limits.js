@@ -4,8 +4,9 @@ export const LIMITS = {
   boardDescription: 300,
   groupName: 60,
   taskTitle: 200,
-  taskDescription: 5000,
-  taskNote: 1000,
+  // Contados em caracteres de HTML: a formatação (negrito, marca-texto, listas) ocupa espaço.
+  taskDescription: 20000,
+  taskNote: 5000,
   subtasks: 50,
   subtaskTitle: 200,
   boardMembers: 50,

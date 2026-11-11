@@ -5,6 +5,7 @@ import { ON_COMPLETE } from '@/constants/task';
 import { DROP_TYPE } from '@/hooks/useTaskDnd';
 import { tiltFor } from '@/utils/board';
 import { cn } from '@/utils/cn';
+import { RichTextView } from './RichTextView';
 import { DueBadge, PriorityBadge } from './TaskBadges';
 import { StatusSelect } from './StatusSelect';
 
@@ -50,12 +51,12 @@ export function TaskCard({ task, color, canEdit, onStatusChange, lifted = false 
             </span>
           )}
         </div>
-        <p
+        <div
           onMouseDown={keepScrollbarFromDragging}
-          className="-mr-1.5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-3 text-[12.5px] leading-normal whitespace-pre-line text-ink-soft wrap-anywhere [scrollbar-width:thin]"
+          className="-mr-1.5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-3 text-[12.5px] leading-normal text-ink-soft [scrollbar-width:thin]"
         >
-          {task.note}
-        </p>
+          <RichTextView plainLinks value={task.note} className="rich-text-compact" />
+        </div>
       </article>
     </div>
   );

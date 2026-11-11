@@ -185,6 +185,69 @@
     filter: drop-shadow(0 3px 3px rgb(40 30 10 / 0.2)) drop-shadow(0 18px 20px rgb(40 30 10 / 0.3));
   }
 
+  /* Texto com formatação (editor e visualização). O preflight zera listas e margens. */
+  .rich-text {
+    overflow-wrap: anywhere;
+  }
+
+  .rich-text > * + * {
+    margin-top: 0.45em;
+  }
+
+  .rich-text ul {
+    padding-left: 1.25em;
+    list-style: disc;
+  }
+
+  .rich-text ol {
+    padding-left: 1.4em;
+    list-style: decimal;
+  }
+
+  .rich-text li + li {
+    margin-top: 0.15em;
+  }
+
+  .rich-text strong,
+  .rich-text b {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .rich-text a,
+  .rich-text .rich-link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .rich-text blockquote {
+    border-left: 3px solid var(--line);
+    padding-left: 0.75em;
+    color: var(--ink-soft);
+  }
+
+  /* Marca-texto sempre com texto escuro: as cores da paleta são claras nos dois temas. */
+  .rich-text mark {
+    border-radius: 3px;
+    padding: 0 2px;
+    color: #1c1917;
+    background-color: #fde047;
+    box-decoration-break: clone;
+  }
+
+  .rich-text-compact > * + * {
+    margin-top: 0.25em;
+  }
+
+  .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
   .select-chip {
     appearance: none;
     background-image: none;

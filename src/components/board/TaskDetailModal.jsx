@@ -4,8 +4,12 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { LIMITS } from '@/constants/limits';
 import { ON_COMPLETE_OPTIONS } from '@/constants/task';
+import { useToast } from '@/hooks/useContexts';
 import { formatFullDate } from '@/utils/dates';
+import { sameRichText } from '@/utils/richText';
 import { EditableText } from './EditableText';
+import { RichTextInline } from './RichTextField';
+import { RichTextView } from './RichTextView';
 import { StatusSelect } from './StatusSelect';
 import { SubtaskList } from './SubtaskList';
 import { PriorityBadge } from './TaskBadges';
@@ -34,9 +38,20 @@ function Setting({ label, children }) {
  * Prazo, prioridade, grupo e comportamento ao finalizar exigem o botão "Editar tarefa".
  */
 export function TaskDetailModal({ task, group, groups, boardId, canEdit, actions, onClose, onMove }) {
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   const onCompleteLabel = ON_COMPLETE_OPTIONS.find((option) => option.value === task.onComplete)?.label;
   const save = (field) => (value) => actions.saveFields(task, { [field]: value });
+
+  // Salva ao sair do campo, só se algo mudou; texto puro antigo não é regravado à toa.
+  const saveRich = (field, limit) => (html) => {
+    if (sameRichText(html, task[field])) return;
+    if (html.length > limit) {
+      toast.error('Texto longo demais para salvar, mesmo contando a formatação. Divida em partes menores.');
+      return;
+    }
+    actions.saveFields(task, { [field]: html });
+  };
 
   const remove = async () => {
     const removed = await actions.removeTask(task);
@@ -108,29 +123,29 @@ export function TaskDetailModal({ task, group, groups, boardId, canEdit, actions
 
         {/* "note" aparece como Descrição (é o texto do post-it); "description", como Observação. */}
         <Section title="Descrição">
-          <EditableText
-            multiline
-            label="Descrição"
-            value={task.note}
-            placeholder={canEdit ? 'Adicione uma descrição' : 'Sem descrição'}
-            readOnly={!canEdit}
-            maxLength={LIMITS.taskNote}
-            onSave={save('note')}
-            className="text-sm leading-relaxed"
-          />
+          {canEdit ? (
+            <RichTextInline
+              label="Descrição"
+              value={task.note}
+              placeholder="Adicione uma descrição"
+              onBlur={saveRich('note', LIMITS.taskNote)}
+            />
+          ) : (
+            <RichTextView value={task.note} placeholder="Sem descrição" className="text-sm leading-relaxed" />
+          )}
         </Section>
 
         <Section title="Observação">
-          <EditableText
-            multiline
-            label="Observação"
-            value={task.description}
-            placeholder={canEdit ? 'Adicione uma observação' : 'Sem observação'}
-            readOnly={!canEdit}
-            maxLength={LIMITS.taskDescription}
-            onSave={save('description')}
-            className="text-sm leading-relaxed"
-          />
+          {canEdit ? (
+            <RichTextInline
+              label="Observação"
+              value={task.description}
+              placeholder="Adicione uma observação"
+              onBlur={saveRich('description', LIMITS.taskDescription)}
+            />
+          ) : (
+            <RichTextView value={task.description} placeholder="Sem observação" className="text-sm leading-relaxed" />
+          )}
         </Section>
 
         <Section title="Subtarefas">

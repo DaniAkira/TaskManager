@@ -98,8 +98,9 @@ service cloud.firestore {
         ])
         && isText(data.groupId, 1, 128)
         && isText(data.title, 1, 200)
-        && isText(data.description, 0, 5000)
-        && isText(data.note, 0, 1000)
+        // HTML do editor de texto (sanitizado no cliente); o limite conta as tags.
+        && isText(data.description, 0, 20000)
+        && isText(data.note, 0, 5000)
         && data.subtasks is list
         && data.subtasks.size() <= 50
         && (data.dueDate == null

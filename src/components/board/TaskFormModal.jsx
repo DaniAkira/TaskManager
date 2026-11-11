@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Field, Input, Select, Textarea } from '@/components/ui/Field';
+import { Field, Input, Select } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { LIMITS } from '@/constants/limits';
 import {
@@ -17,6 +17,7 @@ import { createTask, updateTask } from '@/services/tasks';
 import { cn } from '@/utils/cn';
 import { friendlyError } from '@/utils/errors';
 import { isBlank } from '@/utils/validators';
+import { RichTextField } from './RichTextField';
 import { SubtaskList } from './SubtaskList';
 import { PriorityBadge } from './TaskBadges';
 
@@ -46,6 +47,15 @@ function toTaskFields(values) {
   };
 }
 
+const TOO_LONG = 'Texto longo demais, mesmo contando a formatação. Divida entre Descrição e Observação.';
+
+function textLimitErrors({ note, description }) {
+  return {
+    ...(note.length > LIMITS.taskNote && { note: TOO_LONG }),
+    ...(description.length > LIMITS.taskDescription && { description: TOO_LONG }),
+  };
+}
+
 function changedFields(next, task) {
   return Object.fromEntries(
     Object.entries(next).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(task[key])),
@@ -71,12 +81,16 @@ export function TaskFormModal({ boardId, groups, groupId, task, actions, onClose
   const toast = useToast();
   const [values, setValues] = useState(() => initialValues(task, groupId));
   const [error, setError] = useState('');
+  const [textErrors, setTextErrors] = useState({});
   const set = (field) => (value) => setValues((current) => ({ ...current, [field]: value }));
   const fromEvent = (field) => (event) => set(field)(event.target.value);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isBlank(values.title)) return setError('Dê um título à tarefa.');
+    const tooLong = textLimitErrors(values);
+    setTextErrors(tooLong);
+    if (Object.keys(tooLong).length > 0) return undefined;
     const onError = (saveError) => toast.error(friendlyError(saveError));
     const fields = toTaskFields(values);
 
@@ -118,22 +132,21 @@ export function TaskFormModal({ boardId, groups, groupId, task, actions, onClose
           )}
         </Field>
         {/* Na interface, "note" se chama Descrição (o texto do post-it) e "description", Observação. */}
-        <Field label="Descrição" hint="Aparece no post-it.">
-          {(control) => (
-            <Textarea {...control} rows={2} value={values.note} maxLength={LIMITS.taskNote} onChange={fromEvent('note')} />
-          )}
-        </Field>
-        <Field label="Observação">
-          {(control) => (
-            <Textarea
-              {...control}
-              rows={3}
-              value={values.description}
-              maxLength={LIMITS.taskDescription}
-              onChange={fromEvent('description')}
-            />
-          )}
-        </Field>
+        <RichTextField
+          label="Descrição"
+          hint="Aparece no post-it. Cole do Word ou de um e-mail sem perder negrito e marca-texto."
+          error={textErrors.note}
+          value={values.note}
+          onChange={set('note')}
+          minHeight="min-h-16"
+        />
+        <RichTextField
+          label="Observação"
+          error={textErrors.description}
+          value={values.description}
+          onChange={set('description')}
+          minHeight="min-h-28"
+        />
         <div>
           <p className="mb-1.5 text-[13px] font-semibold text-ink-soft">Subtarefas</p>
           <SubtaskList value={values.subtasks} onChange={set('subtasks')} />

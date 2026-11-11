@@ -46,7 +46,9 @@ boards/{boardId}/groups/{groupId}
 
 boards/{boardId}/tasks/{taskId}
   groupId
-  title, description, note
+  title
+  note          HTML formatado; na interface se chama Descrição (aparece no post-it)
+  description   HTML formatado; na interface se chama Observação
   subtasks: [{ id, title, done }]
   dueDate: 'YYYY-MM-DD' | null
   priority: 1 | 2 | 3 | 4
@@ -97,7 +99,7 @@ Decisões de segurança que valem nas Rules, não só na UI:
 - **E-mail verificado.** Ler ou aceitar convite exige `email_verified`; sem isso, bastaria criar conta com o e-mail de outra pessoa.
 - **Erros de login genéricos**, para não revelar quais e-mails existem. O cadastro informa que o e-mail já existe, como pedido no requisito.
 - **Recuperação de senha sem revelar contas.** A tela responde igual para qualquer e-mail. A nova senha é definida na página do próprio Firebase, que aplica a política de senha do projeto.
-- **Texto salvo como foi digitado.** O React escapa na renderização e o app não usa `dangerouslySetInnerHTML`; escapar antes de salvar corromperia o conteúdo.
+- **Texto formatado sanitizado nas duas pontas.** Descrição e Observação guardam HTML do editor (Tiptap). `sanitizeRichText` (DOMPurify com lista fechada de tags e, do CSS, só o fundo do marca-texto) roda antes de salvar e antes de exibir; é o único ponto do app que usa `dangerouslySetInnerHTML`. Texto puro de antes do editor é exibido como texto.
 
 ## Comportamentos definidos
 
