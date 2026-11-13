@@ -1,7 +1,8 @@
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Clock } from 'lucide-react';
 import { priorityOption, statusOption } from '@/constants/task';
+import { useNow } from '@/hooks/useNow';
 import { cn } from '@/utils/cn';
-import { describeDueDate } from '@/utils/dates';
+import { describeDueDate, formatDateTime, formatElapsed } from '@/utils/dates';
 
 const DUE_TONES = {
   overdue: 'font-bold text-rose-800 dark:text-rose-300',
@@ -61,6 +62,23 @@ export function StatusBadge({ value, className }) {
   );
 }
 
+/** Tempo desde a criação da tarefa, atualizado sozinho; a data exata fica na dica. */
+export function TaskAge({ createdAt, className }) {
+  const now = useNow();
+  if (!createdAt) return null;
+  const { short, long } = formatElapsed(createdAt.toMillis(), now);
+  return (
+    <span
+      title={`Criada em ${formatDateTime(createdAt)}`}
+      aria-label={`Criada há ${long}`}
+      className={cn('inline-flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums', className)}
+    >
+      <Clock aria-hidden className="size-3.5 @max-[13rem]:hidden" />
+      {short}
+    </span>
+  );
+}
+
 /** `compact` troca a frase pela forma curta; a frase completa fica na dica e no leitor de tela. */
 export function DueBadge({ date, compact = false, className }) {
   if (!date) return null;
@@ -72,7 +90,8 @@ export function DueBadge({ date, compact = false, className }) {
       className={cn('inline-flex shrink-0 items-center gap-1 text-xs whitespace-nowrap', DUE_TONES[urgency], className)}
     >
       <CalendarDays aria-hidden className="size-3.5" />
-      {compact ? short : label}
+      {/* Em post-its estreitos fica só o ícone colorido; a data segue na dica. */}
+      {compact ? <span className="@max-[13rem]:sr-only">{short}</span> : label}
     </span>
   );
 }

@@ -95,6 +95,32 @@ export function sanitizeRichText(html) {
   return DOMPurify.sanitize(html ?? '', { ALLOWED_TAGS, ALLOWED_ATTR });
 }
 
+// Mesmo respiro entre parágrafos que o app mostra (0,45em em 14px).
+const EMAIL_PARAGRAPH = 'margin:0 0 6px 0';
+const EMAIL_LIST = 'margin:0 0 6px 0;padding-left:24px';
+const EMAIL_LIST_ITEM = 'margin:0 0 2px 0';
+
+/**
+ * Prepara o HTML copiado para colar em e-mail. Sem margens explícitas, o Outlook aplica a
+ * margem padrão de <p> (uma linha inteira) e o texto parece ter linhas em branco que não
+ * dá para apagar. O marca-texto ganha cor de texto escura, como no app.
+ */
+export function applyEmailSpacing(root) {
+  root.querySelectorAll('p').forEach((paragraph) => {
+    paragraph.style.cssText = paragraph.closest('li') ? 'margin:0' : EMAIL_PARAGRAPH;
+  });
+  root.querySelectorAll('ul, ol').forEach((list) => {
+    list.style.cssText = EMAIL_LIST;
+  });
+  root.querySelectorAll('li').forEach((item) => {
+    item.style.cssText = EMAIL_LIST_ITEM;
+  });
+  root.querySelectorAll('mark').forEach((mark) => {
+    mark.style.color = '#1c1917';
+  });
+  return root;
+}
+
 /**
  * O Word cola listas como parágrafos "MsoList" com o marcador ("·", "1.") num span
  * mso-list:Ignore. Aqui eles viram <ul>/<ol> de verdade antes de chegar ao editor.

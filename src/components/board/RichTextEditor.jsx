@@ -13,8 +13,10 @@ import {
   Underline,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { DOMSerializer } from '@tiptap/pm/model';
 import {
   HIGHLIGHT_COLORS,
+  applyEmailSpacing,
   normalizeHighlight,
   sanitizeRichText,
   toEditorHtml,
@@ -50,6 +52,16 @@ function buildExtensions(placeholder) {
     Placeholder.configure({ placeholder }),
   ];
 }
+
+// Ao copiar, o HTML leva margens explícitas: sem elas o Outlook aplica a margem padrão
+// de <p>, e cada linha parece separada por uma linha em branco que não dá para apagar.
+const emailClipboardSerializer = {
+  serializeFragment(fragment, options, target) {
+    const schema = fragment.firstChild?.type.schema;
+    if (!schema) return target ?? options.document.createDocumentFragment();
+    return applyEmailSpacing(DOMSerializer.fromSchema(schema).serializeFragment(fragment, options, target));
+  },
+};
 
 /** O que vai para o banco: sempre sanitizado, e vazio de verdade quando não há texto. */
 function serialize(editor) {
@@ -186,7 +198,10 @@ export default function RichTextEditor({
           ...(labelledBy && { 'aria-labelledby': labelledBy }),
         },
         transformPastedHTML: transformWordLists,
+        clipboardSerializer: emailClipboardSerializer,
       },
+      // Em texto puro, uma quebra de linha entre parágrafos (o padrão, duas, vira linha em branco).
+      coreExtensionOptions: { clipboardTextSerializer: { blockSeparator: '\n' } },
       onUpdate: ({ editor: current }) => handlers.current.onChange?.(serialize(current)),
       onFocus: () => setFocused(true),
       onBlur: ({ editor: current }) => {

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import {
+  applyEmailSpacing,
   isRichText,
   normalizeHighlight,
   sanitizeRichText,
@@ -61,6 +62,26 @@ describe('texto antigo', () => {
   it('converte quebras de linha em parágrafos, escapando o texto', () => {
     expect(toEditorHtml('linha 1\n<b>2</b>')).toBe('<p>linha 1</p><p>&lt;b&gt;2&lt;/b&gt;</p>');
     expect(toEditorHtml('')).toBe('');
+  });
+});
+
+describe('applyEmailSpacing', () => {
+  const render = (html) => {
+    const root = document.createElement('div');
+    root.innerHTML = html;
+    return applyEmailSpacing(root).innerHTML;
+  };
+
+  it('dá margem explícita aos parágrafos, para o Outlook não usar a padrão', () => {
+    expect(render('<p>Daniel<br>Analista</p><p>Hexagon MI</p>')).toBe(
+      '<p style="margin: 0px 0px 6px;">Daniel<br>Analista</p><p style="margin: 0px 0px 6px;">Hexagon MI</p>',
+    );
+  });
+
+  it('deixa parágrafos dentro de lista sem margem e mantém o marca-texto legível', () => {
+    expect(render('<ul><li><p><mark style="background-color: #fde047">a</mark></p></li></ul>')).toBe(
+      '<ul style="margin: 0px 0px 6px; padding-left: 24px;"><li style="margin: 0px 0px 2px;"><p style="margin: 0px;"><mark style="background-color: rgb(253, 224, 71); color: rgb(28, 25, 23);">a</mark></p></li></ul>',
+    );
   });
 });
 
